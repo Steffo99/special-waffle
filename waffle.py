@@ -48,8 +48,7 @@ async def on_message(msg):
                 else:
                     message += f"- {otheruser.icon} | {Vote(otheruser.vote).name}\n"
             await user.message(b, message)
-
-    if not content.startswith("/"):
+    if not content.startswith("/") and user.waffle is not None:
         otherusers = user.waffle.users.copy()
         otherusers.remove(user)
         for otheruser in otherusers:
