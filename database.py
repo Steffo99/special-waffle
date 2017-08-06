@@ -22,7 +22,7 @@ class WaffleStatus(IntEnum):
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "wusers"
 
     tid = Column(BigInteger, primary_key=True)
     tusername = Column(String)
