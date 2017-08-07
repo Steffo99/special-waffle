@@ -65,10 +65,11 @@ async def matchmaking(every):
             second = waiting.pop()
             message = "Benvenuto al Waffle #{id}!\n" \
                       "Tutti i messaggi che scriverai qui arriveranno agli altri giocatori.\n" \
+                      "Ricordati di non rivelare la tua identità, però!" \
                       "Per abbandonare il Waffle, vota /quit.\n" \
                       "Per scoprire il nome degli altri e concludere la partita, vota /reveal.\n" \
                       "Per ingrandire il Waffle, vota /expand.\n" \
-                      "Fine della votazione in 15 minuti!" \
+                      "La votazione terminerà tra 18 ore. Se non avrai votato niente, verrai espulso per inattività.\n" \
                       "Giocatori in questo Waffle:\n"
             newwaffle = Waffle(status=WaffleStatus.CHATTING)
             session.add(newwaffle)
@@ -93,6 +94,7 @@ async def votes(after, waffle_id):
     for user in waffle.users:
         if user.vote == Vote.QUIT or user.vote is None:
             vquit += 1
+            await user.message(b, "Hai abbandonato il Waffle.")
             user.leave_waffle()
             session.commit()
         elif user.vote == Vote.REVEAL:
@@ -126,10 +128,10 @@ async def votes(after, waffle_id):
 
 ml = MessageLoop(b, on_message)
 l.create_task(ml.run_forever())
-l.create_task(matchmaking(60))
+l.create_task(matchmaking(900))
 reloading = session.query(Waffle).filter(Waffle.status == WaffleStatus.CHATTING).all()
 for waffle in reloading:
-    l.create_task(votes(900, waffle.id))
+    l.create_task(votes(21600, waffle.id))
     l.create_task(waffle.message(b, "Oops! Il bot è stato riavviato e il timer della votazione è ricominciato.\n"
-                                    "Fine della votazione in 15 minuti!"))
+                                    "La votazione finirà tra 6 ore."))
 l.run_forever()
