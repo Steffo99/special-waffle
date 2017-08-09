@@ -2,7 +2,7 @@ import asyncio
 from telepot.aio import Bot
 from telepot.aio.loop import MessageLoop
 import config
-from database import session, User, Waffle, WaffleStatus, Vote, func
+from database import session, User, Waffle, WaffleStatus, Vote
 
 b = Bot(config.token)
 l = asyncio.get_event_loop()
@@ -23,7 +23,7 @@ async def on_message(msg):
             newwaffle = Waffle(status=WaffleStatus.MATCHMAKING)
             session.add(newwaffle)
             session.commit()
-            user.join_waffle(newwaffle.id)
+            user.join_waffle(b, newwaffle.id)
             session.commit()
             await user.message(b, "Ricerca di altri giocatori in corso...\n"
                                   "Attendi, per piacere!")
@@ -75,13 +75,13 @@ async def matchmaking(every):
             session.add(newwaffle)
             session.commit()
             for user in first.users + second.users:
-                user.join_waffle(newwaffle.id)
+                user.join_waffle(b, newwaffle.id)
                 message += f"- {user.icon}\n"
             session.commit()
             session.delete(first)
             session.delete(second)
             session.commit()
-            l.create_task(votes(900, newwaffle.id))
+            l.create_task(votes(64800, newwaffle.id))
             await newwaffle.message(b, message.format(id=newwaffle.id))
         await asyncio.sleep(every)
 

@@ -1,8 +1,12 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, create_engine, func
+from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, create_engine
 from enum import IntEnum
+import random
 import config
+import asyncio
+
+l = asyncio.get_event_loop()
 
 engine = create_engine(config.database)
 Base = declarative_base(bind=engine)
@@ -48,10 +52,11 @@ class User(Base):
     async def message(self, bot, msg):
         await bot.sendMessage(self.tid, msg)
 
-    def join_waffle(self, waffle_id):
+    def join_waffle(self, bot, waffle_id):
         self.waffle_id = waffle_id
-        # TODO: improve this
-        self.icon = self.tfirstname[0]
+        self.vote = None
+        self.icon = chr(random.randrange(0x1F300, 0x1F440))
+        l.create_task(self.message(bot, f"La tua icona all'interno della chat sarà {self.icon}."))
 
     def leave_waffle(self):
         self.waffle_id = None
